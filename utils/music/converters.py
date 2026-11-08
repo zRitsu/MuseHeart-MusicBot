@@ -138,7 +138,6 @@ def percentage(part, whole):
     return int((part * whole) / 100.0)
 
 sources = {
-    # Existing sources
     "deezer": "https://iili.io/d1Kjip1.png",
     "soundcloud": "https://iili.io/d1KjPkP.md.png",
     "spotify": "https://iili.io/d1KVvlS.png",
@@ -149,40 +148,11 @@ sources = {
     "tidal": "https://iili.io/d1KjgrQ.png",
     "youtubemusic": "https://iili.io/d1Kj42V.png",
     "last.fm": "https://cdn.discordapp.com/emojis/1278883704097341541.png",
-
-    # LavaSrc Definitive
     "amazonmusic": "https://www.google.com/s2/favicons?domain=music.amazon.com&sz=128",
-    "yandexmusic": "https://www.google.com/s2/favicons?domain=music.yandex.com&sz=128",
-    "flowerytts": "https://www.google.com/s2/favicons?domain=flowery.pw&sz=128",
-    "vkmusic": "https://www.google.com/s2/favicons?domain=vk.com&sz=128",
-    "qobuz": "https://www.google.com/s2/favicons?domain=qobuz.com&sz=128",
-    "audiomack": "https://www.google.com/s2/favicons?domain=audiomack.com&sz=128",
-    "audius": "https://www.google.com/s2/favicons?domain=audius.co&sz=128",
-    "jamendo": "https://www.google.com/s2/favicons?domain=jamendo.com&sz=128",
-    "ccmixter": "https://www.google.com/s2/favicons?domain=ccmixter.org&sz=128",
     "gaana": "https://www.google.com/s2/favicons?domain=gaana.com&sz=128",
-    "bilibili": "https://www.google.com/s2/favicons?domain=bilibili.com&sz=128",
-    "internetarchive": "https://www.google.com/s2/favicons?domain=archive.org&sz=128",
-    "internet-archive": "https://www.google.com/s2/favicons?domain=archive.org&sz=128",
-    "googledrive": "https://www.google.com/s2/favicons?domain=drive.google.com&sz=128",
-    "google-drive": "https://www.google.com/s2/favicons?domain=drive.google.com&sz=128",
-    "getyarn": "https://www.google.com/s2/favicons?domain=getyarn.io&sz=128",
-    "get-yarn": "https://www.google.com/s2/favicons?domain=getyarn.io&sz=128",
-    "clypit": "https://www.google.com/s2/favicons?domain=clyp.it&sz=128",
-    "elgato": "https://www.google.com/s2/favicons?domain=elgato.com&sz=128",
-    "pixeldrain": "https://www.google.com/s2/favicons?domain=pixeldrain.com&sz=128",
-    "pornhub": "https://www.google.com/s2/favicons?domain=pornhub.com&sz=128",
-    "reddit": "https://www.google.com/s2/favicons?domain=reddit.com&sz=128",
-    "ocremix": "https://www.google.com/s2/favicons?domain=ocremix.org&sz=128",
-    "tiktok": "https://www.google.com/s2/favicons?domain=tiktok.com&sz=128",
-    "mixcloud": "https://www.google.com/s2/favicons?domain=mixcloud.com&sz=128",
-    "soundgasm": "https://www.google.com/s2/favicons?domain=soundgasm.net&sz=128",
-    "tumblr": "https://www.google.com/s2/favicons?domain=tumblr.com&sz=128",
-
-    # YouTube playback through yt-dlp
+    "qobuz": "https://www.google.com/s2/favicons?domain=qobuz.com&sz=128",
     "ytdlp": "https://iili.io/d1KjLTF.md.png",
 }
-
 def music_source_image(sourcename):
     return sources.get(
         sourcename,
