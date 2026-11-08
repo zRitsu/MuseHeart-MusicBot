@@ -1536,7 +1536,7 @@ class Music(commands.Cog):
                 view = ButtonInteraction(
                     user=inter.author, timeout=45,
                     buttons=[
-                        disnake.ui.Button(label=ms.title(), custom_id=ms, emoji=music_source_emoji(ms)) for ms in sorted(music_sources)
+                        disnake.ui.Button(label={"amazonmusic": "AmazonMusic", "applemusic": "AppleMusic"}.get(ms, ms.title()), custom_id=ms, emoji=music_source_emoji(ms)) for ms in sorted(music_sources)
                     ]
                 )
 
