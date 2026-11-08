@@ -578,7 +578,6 @@ music_source_emoji_data = {
     "last.fm": "<:Lastfm:1278883704097341541>",
     "bandcamp": "<:bandcamp:767129639490420796>",
     "amazonmusic": "<:play:734221719774035968>",
-    "gaana": "<:play:734221719774035968>",
     "qobuz": "<:play:734221719774035968>",
 }
 
